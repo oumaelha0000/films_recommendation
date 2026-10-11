@@ -1,0 +1,58 @@
+import axios from 'axios';
+
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+});
+
+// Attach JWT token to every request
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Auth
+export const register = (username, password) =>
+  API.post('/auth/register', { username, password });
+
+export const login = (username, password) =>
+  API.post('/auth/login', { username, password });
+
+// Recommendations
+export const getPopularMovies = (limit = 10) =>
+  API.get(`/recommendations/popular?limit=${limit}`);
+
+export const getRecommendations = () =>
+  API.get('/recommendations');
+
+export const retrainModel = (adminKey) =>
+  API.post('/recommendations/retrain', {}, {
+    headers: { 'x-admin-key': adminKey }
+  });
+
+// Movies
+export const searchMovies = (query) =>
+  API.get(`/movies/search?q=${query}`);
+
+export const getMovieDetails = (movieId) =>
+  API.get(`/movies/${movieId}/details`);
+
+// Ratings
+export const submitRating = (movie_id, rating) =>
+  API.post('/ratings', { movie_id, rating });
+
+export const submitBatchRatings = (ratings) =>
+  API.post('/ratings/batch', { ratings });
+
+export const getMyRatings = () =>
+  API.get('/ratings');
+
+export const updateRating = (movie_id, rating) =>
+  API.put(`/ratings/${movie_id}`, { movie_id, rating });
+
+export const deleteRating = (movie_id) =>
+  API.delete(`/ratings/${movie_id}`);
+
+export default API;
